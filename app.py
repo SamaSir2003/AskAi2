@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, render_template, jsonify
 from dotenv import load_dotenv
-from PyPDF2 import PdfReader  # Import for reading PDF files
+from PyPDF2 import PdfReader  
 from io import BytesIO
 import mimetypes
 from openpyxl import load_workbook
@@ -19,7 +19,7 @@ llm = ChatGoogleGenerativeAI(
 
 app = Flask(__name__)
 
-#genai.configure(api_key=api_key)
+
 
 @app.route('/')
 def home():
@@ -37,13 +37,13 @@ def process_file():
         file_content = ""
         
 
-        if file.mimetype == 'application/pdf':  # If the file is a PDF
+        if file.mimetype == 'application/pdf':  
             reader = PdfReader(BytesIO(file.read()))
             for page in reader.pages:
                 file_content += page.extract_text()
                 
         elif "xls" in file.mimetype or "sheet" in file.mimetype or "xl" in file.mimetype or "excel" in file.mimetype:
-            # Use pandas to read Excel file
+            
             
             workbook = load_workbook(BytesIO(file.read()), read_only=True)
             for sheet in workbook.worksheets:
@@ -55,19 +55,16 @@ def process_file():
             for paragraph in document.paragraphs:
                 file_content += paragraph.text + "\n"
 
-        else:  # If the file is a text file
+        else:  
             print("Hello excel")
                 
             file_content = file.read().decode('utf-8')
     except Exception as e:
         return render_template('index.html', error_message=f"Failed to process the file: {e}")
 
-    # Use Generative Model to generate a response
-    #model = genai.GenerativeModel("gemini-1.5-flash")
+    
     try:
-        # response = model.generate_content(
-        #     f"For the content of a data given below\n{file_content}\nAnswer the question below. If there are multiple records, separate them with a newline\n{question}"
-        # )
+        
         response=llm.invoke(f"For the content of a data given below\n{file_content}\nAnswer the question below. If there are multiple records, separate them with a newline\n{question}")
         answer = response.content
     except Exception as e:
